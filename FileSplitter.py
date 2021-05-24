@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 
 cli_parser = None
@@ -9,7 +10,7 @@ def arg_parse():
     cli_parser.add_argument('file_name', help='file_name for split or join')
     cli_parser.add_argument("-s", "--size", type=int, help='file size when split')
     cli_parser.add_argument("-l", "--lines", type=int, help='lines iin file when split')
-    cli_parser.add_argument("-wd", help='working directory for split and join(not implemented yet)')
+    cli_parser.add_argument("--wd", help='working directory for split and join(not implemented yet)')
     return cli_parser.parse_args()
 
 
@@ -78,7 +79,7 @@ class FileSplitter:
             self.bin_reader(self.bin_writer, chunk_size=self.chunk_size)
 
     def join(self, chunk_size=8192):
-        with open(self.input_name+'.all', 'wb') as output:
+        with open(self.output_name+'.all', 'wb') as output:
             fseq = 0
             try:
                 while True:
@@ -89,12 +90,19 @@ class FileSplitter:
             except FileNotFoundError:
                 pass
 
+def file_in_wworking_dir(path, wd):
+    fn = os.path.basename(path)
+    return os.path.join(wd, fn)
 
 if __name__ == '__main__':
     args = arg_parse()
-    fn =  args.file_name
-    fs = FileSplitter(fn, fn, max_lines=args.lines, max_size=args.size)
-    print (f'Fn {fn}, action:{args.join}, lines={args.lines}, size={args.size}')
+    fni =  args.file_name
+    if working_dir := args.wd:
+        fno = file_in_wworking_dir(fni, working_dir)
+    else:
+        fno = fni
+    fs = FileSplitter(fni, fno, max_lines=args.lines, max_size=args.size)
+    print (f'Fn: {fni}, fno: {fno}, wd: {args.wd}, join:{args.join}, lines={args.lines}, size={args.size}')
     if args.join:
         fs.join()
     else:
