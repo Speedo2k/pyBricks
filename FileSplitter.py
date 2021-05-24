@@ -60,7 +60,6 @@ class FileSplitter:
         r.send(None)
         with open(self.input_name, 'rb') as f_in:
             while chunk := (f_in.read(chunk_size)):
-                print(f'Send {len(chunk)} bytes')
                 r.send(chunk)
 
     @staticmethod
